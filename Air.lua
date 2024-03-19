@@ -178,7 +178,7 @@ function Air()
         end,
 
         addMissile = function(self, x, y, ours)
-            m = fire(x, y)
+            local m = fire(x, y)
             m.ours = ours
             m.speed = 1000
             if ours then
