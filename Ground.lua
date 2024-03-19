@@ -39,25 +39,21 @@ function Ground(backgroundFilename)
             bg.y = (bg.y + bg.speed * dt) % 128
 
             -- update craters, which move at the same speed as the background
-            numActive = 0
-            for i = 1, #craters do
-                local c = craters[i]
-                if c.active then
-                    numActive = numActive + 1
-                    c.frame = c.frame + c.speed * dt
-                    if c.frame > #boomSprite.quads then
+            for key, crater in pairs(craters) do
+                if crater.active then
+                    crater.frame = crater.frame + crater.speed * dt
+                    if crater.frame > #boomSprite.quads then
                         -- show's over, hide and disable whatever exploded
-                        c.active = false
+                        crater.active = false
                     end
 
-                    c.y = c.y + bg.speed * dt
-                    if c.y > screenHeight then
-                        c.active = false
+                    crater.y = crater.y + bg.speed * dt
+                    if crater.y > screenHeight then
+                        crater.active = false
                     end
+                else
+                    craters[key] = nil
                 end
-            end
-            if numActive == 0 then
-                craters = {}
             end
         end,
 
@@ -68,14 +64,13 @@ function Ground(backgroundFilename)
             -- otherwise we get a flickering black band
             love.graphics.draw(bg.batch, 0, bg.y - 128)
 
-            for i = 1, #craters do
-                local c = craters[i]
-                if c.active and c.frame >= 1 then
+            for key, crater in pairs(craters) do
+                if crater and crater.active and crater.frame >= 1 then
                     love.graphics.draw(
                         boomSprite.image,
-                        boomSprite.quads[math.floor(c.frame)],
-                        c.x - 32,
-                        c.y - 32,
+                        boomSprite.quads[math.floor(crater.frame)],
+                        crater.x - 32,
+                        crater.y - 32,
                         0,
                         2
                     )
@@ -85,7 +80,7 @@ function Ground(backgroundFilename)
         end,
 
         -- add some secondary explosions on the ground
-        markCrashSite = function(self, x, y, offset)
+        addCraters = function(self, x, y, offset)
             offset = offset or 32
             for k = 1, math.random(1, 5) do
                 local point = {

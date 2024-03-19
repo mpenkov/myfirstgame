@@ -1,31 +1,42 @@
 function Player()
+    local sprite = love.graphics.newImage("sprites/su27-64-camo.png")
+    local spriteWidth = 64
+    local spriteHeight = 64
+    local defaultHealth = 5
+
+    if false then
+        sprite = love.graphics.newImage("sprites/samolet-32.png")
+        spriteWidth = 32
+        spriteHeight = 32
+        defaultHealth = 10000
+    end
+
+    width, height = 128, 128
+
     return {
         x = love.graphics.getWidth() / 2,
-        y = love.graphics.getHeight() - 128,
-        width = 128,
-        height = 128,
+        y = love.graphics.getHeight() - height * 2,
+        width = width,
+        height = height,
         speed = 500,
-        sprite = love.graphics.newImage("sprites/su27-64-camo.png"),
-        spriteWidth = 64,
-        spriteHeight = 64,
         hardpoint = 0,
         lastMissile = 0,
         reloadTime = 0.1,
-        health = 5,
+        health = defaultHealth,
         active = true,
 
         update = playerUpdate,
 
         draw = function(self)
             love.graphics.setColor(1, 1, 1)
-            local sx = player.width / player.spriteWidth
-            local sy = player.height / player.spriteHeight
-            love.graphics.draw(player.sprite, player.x, player.y, 0, sx, sy)
+            local sx = player.width / spriteWidth
+            local sy = player.height / spriteHeight
+            love.graphics.draw(sprite, self.x, self.y, 0, sx, sy)
         end,
 
         hit = function(self, missile)
             missile.active = false
-            air:markExplosion(missile.x, missile.y, {1, 1, 0.8})
+            air:addExplosion(missile.x, missile.y, {1, 1, 0.8})
 
             self.health = self.health - 1
             if self.health <= 0 then
@@ -70,16 +81,15 @@ function playerUpdate(self, dt)
             x = self.x + self.width
             self.hardpoint = 0
         end
-        air:addMissile(x, self.y + self.width, true)
+        air:addMissile(x, self.y, true)
         self.lastMissile = now
     end
 
     -- collision between us and the enemy kills both
-    for i = 1, #air.enemies do
-        local e = air.enemies[i]
-        if e.active and collision(player, e) then
+    for key, enemy in pairs(air.enemies) do
+        if enemy and enemy.active and collision(player, enemy) then
             destroy(player)
-            destroy(e)
+            destroy(enemy)
         end
     end
 end

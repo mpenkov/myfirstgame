@@ -19,7 +19,8 @@ function Air()
         )
     end
 
-    local explosions = {}
+    local screenWidth = love.graphics.getWidth()
+    local screenHeight = love.graphics.getHeight()
 
     local clouds = {}
     local cloudSprite = {
@@ -30,79 +31,84 @@ function Air()
     local cloudCount = 8
     for i = 1, cloudCount do
         local c = {
-            x = math.random(love.graphics.getWidth()),
-            y = math.random(love.graphics.getHeight()),
+            x = math.random(screenWidth),
+            y = math.random(screenHeight),
             speed = math.random(512, 1536), 
             scale = math.random(2, 4),
         }
         table.insert(clouds, c)
     end
 
+    local explosions = {}
     local missiles = {}
     local enemies = {}
 
     return {
-        player=player,
-        enemies=enemies,
+        player = player,
+        enemies = enemies,
+        missiles = missiles,
 
-        update=function(self, dt)
-            local screenWidth = love.graphics.getWidth()
-            local screenHeight = love.graphics.getHeight()
-
-            for i = 1, #clouds do
-                clouds[i].y = clouds[i].y + clouds[i].speed * dt
-                if clouds[i].y > screenHeight then
-                    clouds[i].x = math.random(screenWidth - cloudSprite.width * clouds[i].scale)
-                    clouds[i].y = math.random(-screenHeight, - cloudSprite.height * clouds[i].scale)
+        update = function(self, dt)
+            for key, cloud in pairs(clouds) do
+                cloud.y = cloud.y + cloud.speed * dt
+                if cloud.y > screenHeight then
+                    cloud.x = math.random(screenWidth - cloudSprite.width * cloud.scale)
+                    cloud.y = math.random(-screenHeight, - cloudSprite.height * cloud.scale)
                 end
             end
 
             activeCount = 0
-            for i = 1, #enemies do
-                if enemies[i].active then
+            for key, enemy in pairs(enemies) do
+                if enemy and enemy.active then
                     activeCount = activeCount + 1
-                    enemies[i]:update(dt)
+                    enemy:update(dt)
+                else
+                    enemies[key] = nil
                 end
             end
 
+            -- no more enemies left, respawn
             if activeCount == 0 then
                 self:addEnemies(math.random(1, 10))
-            else
-                self.enemies = {}
             end
 
             -- move existing missiles
-            for i = 1, #missiles do
-                local m = missiles[i]
-                if m.active then
-                    m.y = m.y + m.speed * dt
+            for key, msl in pairs(missiles) do
+                if msl and msl.active then
+                    msl.y = msl.y + msl.speed * dt
 
-                    -- collision detection
-                    if m.ours then
-                        for j = 1, #enemies do
-                            if enemies[j].active and collision(m, enemies[j]) then
-                                enemies[j]:hit(m)
-                                break
-                            end
-                        end
-                    else
-                        if collision(m, player) then
-                            player:hit(m)
+                    -- enemy missiles can hurt other enemies, too
+                    for key, enemy in pairs(enemies) do
+                        if enemy and enemy.active and collision(msl, enemy) then
+                            enemy:hit(msl)
+                            break
                         end
                     end
+
+                    -- only enemy missiles can hurt the player
+                    if not msl.ours and collision(msl, player) then
+                        player:hit(msl)
+                    end
+
+                    if msl.y < 0 or msl.y > screenHeight then
+                        msl.active = false
+                    end
+                else
+                    missiles[key] = nil
                 end
             end
 
             -- update explosions
-            for i = 1, #explosions do
-                local e = explosions[i]
-                if e.active then
-                    e.frame = e.frame + e.speed * dt
-                    if e.frame > #boomSprite.quads then
+            for key, expl in pairs(explosions) do
+                if expl and expl.active then
+                    expl.frame = expl.frame + expl.speed * dt
+                    if expl.frame > #boomSprite.quads then
                         -- show's over, hide and disable whatever exploded
-                        e.active = false
-                        e.thing.active = false
+                        expl.active = false
+                        expl.thing.active = false
                     end
+                else
+                    explosions[key] = nil
                 end
             end
 
@@ -110,44 +116,51 @@ function Air()
 
         draw=function(self)
             love.graphics.setColor(1, 1, 1)
-            for i = 1, #clouds do
-                love.graphics.draw(cloudSprite.image, clouds[i].x, clouds[i].y, 0, clouds[i].scale)
+            for key, cloud in pairs(clouds) do
+                love.graphics.draw(cloudSprite.image, cloud.x, cloud.y, 0, cloud.scale)
             end
+
+            -- cloud shadows
+            --[[
+            for i = 1, #clouds do
+                local c = clouds[i]
+                local width = clouds[i].scale * cloud.width
+                local cx, cy = c.x + width / 2, c.y + width / 2
+                local offset = clouds[i].scale * cloud.width / 16
+                love.graphics.setColor(75/255, 105/255, 47/255)
+                love.graphics.circle("fill", cx - offset, c.x + offset / 2, 15 * c.scale)
+            end
+            --]]
 
             if player.active then
                 player:draw()
             end
 
-            for i = 1, #enemies do
-                local e = enemies[i]
-                if e.active then
-                    e:draw()
+            for key, enemy in pairs(enemies) do
+                if enemy and enemy.active then
+                    enemy:draw()
                 end
             end
 
-            for i = 1, #missiles do
-                local m = missiles[i]
-                if m.active then
-                    if m.ours then
-                        love.graphics.setColor(1, 0, 0)
-                        love.graphics.rectangle("fill", m.x, m.y, m.width, m.height)
-                    else
-                        love.graphics.setColor(1, 1, 0)
-                        love.graphics.rectangle("fill", m.x, m.y, m.width, m.height)
-                    end
+            for key, msl in pairs(missiles) do
+                if msl and msl.active and msl.ours then
+                    love.graphics.setColor(1, 0, 0)
+                    love.graphics.rectangle("fill", msl.x, msl.y, msl.width, msl.height)
+                elseif msl and msl.active then
+                    love.graphics.setColor(1, 1, 0)
+                    love.graphics.rectangle("fill", msl.x, msl.y, msl.width, msl.height)
                 end
             end
 
             -- Nb. this must happen _after_ the player etc. have been drawn
-            for i = 1, #explosions do
-                local e = explosions[i]
-                if e.active then
-                    love.graphics.setColor(e.color[1], e.color[2], e.color[3])
+            for key, expl in pairs(explosions) do
+                if expl and expl.active then
+                    love.graphics.setColor(expl.color[1], expl.color[2], expl.color[3])
                     love.graphics.draw(
                         boomSprite.image,
-                        boomSprite.quads[math.floor(e.frame)],
-                        e.x - 5 * 32,
-                        e.y - 5 * 32,
+                        boomSprite.quads[math.floor(expl.frame)],
+                        expl.x - 5 * 32,
+                        expl.y - 5 * 32,
                         0,
                         10
                     )
@@ -155,7 +168,7 @@ function Air()
             end
         end,
 
-        markExplosion = function(self, x, y, color)
+        addExplosion = function(self, x, y, color)
             expl = boom({x=x, y=y})
             expl.speed = 5 + math.random() * 5
             expl.color = color or {1, 1, 0.85}
@@ -178,13 +191,13 @@ function Air()
         end,
 
         addMissile = function(self, x, y, ours)
-            local m = fire(x, y)
-            m.ours = ours
-            m.speed = 1000
+            local msl = fire(x, y)
+            msl.ours = ours
+            msl.speed = 1000
             if ours then
-                m.speed = -1000
+                msl.speed = -1000
             end
-            table.insert(missiles, m)
+            table.insert(missiles, msl)
         end,
     }
 end

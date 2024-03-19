@@ -12,13 +12,6 @@ function love.load()
     love.mouse.setVisible(false)
 
     _G.player = Player()
-    if false then
-        player.sprite = love.graphics.newImage("sprites/samolet-32.png")
-        player.spriteWidth = 32
-        player.spriteHeight = 32
-        player.health = 10000
-    end
-
     _G.ground = Ground()
     _G.air = Air()
 
@@ -28,7 +21,6 @@ function love.load()
     else
         air:addEnemies(math.random(1, 5))
     end
-
 end
 
 function love.update(dt)
@@ -44,55 +36,40 @@ function love.update(dt)
         player.health = 5
         player.lastMissile = love.timer.getTime()
     else
+        --
         -- forces enemies to GTFO early, making for a more interesting scene
+        --
         player.x = love.graphics.getWidth() / 2
         player.y = love.graphics.getHeight() / 4
     end
-
-    --respawn enemies
-    --[[
-    if activeEnemies == 0 then
-        _G.enemies = {}
-        spawnMany(math.random(1, 10))
-    end
-    ]]
 end
 
 function love.draw()
     ground:draw()
-    air.draw()
-    -- cloud shadows
-    --[[
-    for i = 1, #clouds do
-        local c = clouds[i]
-        local width = clouds[i].scale * cloud.width
-        local cx, cy = c.x + width / 2, c.y + width / 2
-        local offset = clouds[i].scale * cloud.width / 16
-        love.graphics.setColor(75/255, 105/255, 47/255)
-        love.graphics.circle("fill", cx - offset, c.x + offset / 2, 15 * c.scale)
-    end
-    --]]
+    air:draw()
 end
 
 function destroy(thing)
-    local offset = thing.width / 2
-    for k = 1, math.random(1, 5) do
-        if thing == player then
-            color = {1, 1, 0.85}
-        else
-            color = {1, 0.85, 0.85}
-        end
-
-        -- set the center of the explosion to the enemy
-        air:markExplosion(
-            thing.x + offset * (0.5 + math.random()),
-            thing.y + offset * (0.5 + math.random()),
-            color
-        )
+    local color = {1, 0.85, 0.85}
+    if thing == player then
+        color = {1, 1, 0.85}
     end
 
-    if thing ~= player then
-        ground:markCrashSite(thing.x, thing.y, offset / 4)
+    for k = 1, math.random(1, 5) do
+        -- set the center of the explosion to center of the thing that exploded
+        local x = thing.x + thing.width * math.random(-1, 1)
+        local y = thing.y + thing.height * math.random(-1, 1)
+        air:addExplosion(x, y, color)
+    end
+
+    if thing == player then
+        --
+        -- the player leaves a crater closer to the top of the screen, otherwise
+        -- we don't see it because of the scrolling
+        --
+        ground:addCraters(thing.x, thing.y - 750, thing.width / 4)
+    else
+        ground:addCraters(thing.x, thing.y, thing.width / 4)
     end
 
     thing.active = false
