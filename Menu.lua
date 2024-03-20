@@ -5,12 +5,12 @@ function Button(x, y, tox, toy, text, fn, fnargs)
         tox = tox,
         toy = toy,
         text = text,
-        width = 200,
-        height = 50,
+        width = 400,
+        height = 75,
         selcolor = {1.0, 0.5, 0.5},
         bgcolor = {0.7, 0.7, 0.7},
         fgcolor = {0, 0, 0},
-        font = love.graphics.newFont("fonts/FreeMono.ttf", 20),
+        font = love.graphics.newFont("fonts/FreeMono.ttf", 32),
         selected = false,
         fn = fn,
         fn_args = fn_args,
@@ -49,6 +49,37 @@ local menuOptionsBack = function()
     _G.menu.screen = "main"
 end
 
+local spaceVertically = function(buttons, spacing)
+    local nextY = buttons[1].y
+    for num, btn in pairs(buttons) do
+        btn.x = buttons[1].x
+        btn.y = nextY
+        btn.width = buttons[1].width
+        btn.height = buttons[1].height
+        nextY = nextY + btn.height + spacing
+    end
+end
+
+local label = function(x, y, text)
+    --
+    -- Hacky: labels are just buttons that we never select
+    --
+    local lbl = Button(x, y, 10, 15, text)
+    lbl.width = 600
+    lbl.fgcolor = {1, 1, 1}
+    lbl.bgcolor = {0.2, 0.2, 0.2}
+    return lbl
+end
+
+local wrap = function(value, max)
+    if value > max then
+        return 1
+    elseif value < 1 then
+        return max
+    end
+    return value
+end
+
 function Menu()
     local planes = {}
     for key, val in pairs(_G.planes) do
@@ -64,21 +95,18 @@ function Menu()
 
     local lastEvent = love.timer.getTime()
     local buttons = {}
+    local spacing = 20
     buttons["main"] = {}
     buttons["options"] = {}
 
-    table.insert(
-        buttons["main"],
-        Button(100, 100, 10, 15, "Полетели!", menuHide)
-    )
-    table.insert(
-        buttons["main"],
-        Button(100, 200, 10, 15, "Настройки", menuOptions)
-    )
-    table.insert(
-        buttons["main"],
-        Button(100, 300, 10, 15, "Выйти", love.event.quit)
-    )
+    local btnGo = Button(100, 100, 10, 15, "Полетели!", menuHide)
+    local btnOptions = Button(0, 0, 10, 15, "Настройки", menuOptions)
+    local btnQuit = Button(0, 0, 10, 15, "Выйти", love.event.quit)
+
+    table.insert(buttons["main"], btnGo)
+    table.insert(buttons["main"], btnOptions)
+    table.insert(buttons["main"], btnQuit)
+    spaceVertically(buttons["main"], spacing)
 
     local changePlane = function()
         currentPlane = currentPlane + 1
@@ -87,18 +115,15 @@ function Menu()
         end
     end
 
-    table.insert(
-        buttons["options"],
-        Button(100, 100, 10, 15, "Сменить самолёт", changePlane)
-    )
-    table.insert(
-        buttons["options"],
-        Button(100, 200, 10, 15, "Сменить карту", menuOptionsChangeMap)
-    )
-    table.insert(
-        buttons["options"],
-        Button(100, 300, 10, 15, "Назад", menuOptionsBack)
-    )
+    local btnChangePlane = Button(btnGo.x, btnGo.y, 10, 15, "Сменить самолёт", changePlane)
+    local btnChangeMap = Button(0, 0, 10, 15, "Сменить карту", menuOptionsChangeMap)
+
+    local btnOptionsBack = Button(0, 0, 10, 15, "Назад", menuOptionsBack)
+
+    table.insert(buttons["options"], btnChangePlane)
+    table.insert(buttons["options"], btnChangeMap)
+    table.insert(buttons["options"], btnOptionsBack)
+    spaceVertically(buttons["options"], spacing)
 
     local sel = {}
     sel["main"] = 1
@@ -108,16 +133,12 @@ function Menu()
     labels["main"] = {}
     labels["options"] = {}
 
-    --
-    -- Hacky: labels are just buttons that we never select
-    --
-    local lblCurrentPlane = Button(400, 100, 10, 15, planes[currentPlane])
-    lblCurrentPlane.width = 400
+    local lblCurrentPlane = label(btnGo.x + btnGo.width + spacing, btnGo.y, planes[currentPlane])
+    local lblCurrentMap = label("TODO")
+
     table.insert(labels["options"], lblCurrentPlane)
-    table.insert(
-        labels["options"],
-        Button(400, 200, 10, 15, "TODO")
-    )
+    table.insert(labels["options"], lblCurrentMap)
+    spaceVertically(labels["options"], spacing)
 
     return {
         show = true,
@@ -137,30 +158,34 @@ function Menu()
 
         update = function(self, dt)
             lblCurrentPlane.text = planes[currentPlane]
+        end,
 
-            local now = love.timer.getTime()
-            if now - lastEvent < 0.1 then
-                return
-            end
-            lastEvent = now
-
-            if love.keyboard.isDown("down") then
-                sel[self.screen] = sel[self.screen] + 1
-            elseif love.keyboard.isDown("up") then
-                sel[self.screen] = sel[self.screen] - 1
-            end
-
-            if sel[self.screen] > #buttons[self.screen] then
-                sel[self.screen] = 1
-            elseif sel[self.screen] < 1 then
-                sel[self.screen] = #buttons[self.screen]
-            end
-
-            if love.keyboard.isDown("space") or love.keyboard.isDown("return") then
+        keypressed = function(self, key, scancode, isrepeat)
+            --
+            -- these keys get handled uniformly across all screens
+            --
+            if key == "down" then
+                sel[self.screen] = wrap(sel[self.screen] + 1, #buttons[self.screen])
+            elseif key == "up" then
+                sel[self.screen] = wrap(sel[self.screen] - 1, #buttons[self.screen])
+            elseif key == "space" or key == "return" then
                 local idx = sel[self.screen]
                 local btn = buttons[self.screen][idx]
                 if btn.fn then
                     btn.fn(btn.fn_args)
+                end
+            end
+
+            --
+            -- screen-specific shortcuts
+            --
+            if self.screen == "main" then
+                if key == "escape" then
+                    menuHide()
+                end
+            elseif self.screen == "options" then
+                if key == "escape" then
+                    menuOptionsBack()
                 end
             end
         end,
@@ -168,6 +193,8 @@ function Menu()
         getCurrentPlane = function(self) return planes[currentPlane] end,
     }
 end
+
+
 
 
 return Menu

@@ -95,20 +95,10 @@ function love.update(dt)
     ground:update(dt)
     air:update(dt)
 
-    if love.keyboard.isDown("escape") then
-        menu.show = true
-    end
-
     player:morph(menu:getCurrentPlane())
 
     if player.active then
         player:update(dt)
-    elseif love.keyboard.isDown("return") then
-        player.x = love.graphics.getWidth() / 2
-        player.y = love.graphics.getHeight() - 2*player.width
-        player.active = true
-        player.health = 5
-        player.lastMissile = love.timer.getTime()
     else
         --
         -- Keep some enemies on the screen to keep it interesting
@@ -132,6 +122,23 @@ function love.update(dt)
     end
     if numActive == 0 then
         _G.missiles = {}
+    end
+end
+
+function love.keypressed(key, scancode, isrepeat)
+    if menu.show then
+        menu:keypressed(key, scancode, isrepeat)
+    elseif key == "escape" then
+        menu.show = true
+    elseif not player.active and key == "return" then
+        --
+        -- respawn player
+        --
+        player.x = love.graphics.getWidth() / 2
+        player.y = love.graphics.getHeight() - 2*player.width
+        player.active = true
+        player.health = 5
+        player.lastMissile = love.timer.getTime()
     end
 end
 
