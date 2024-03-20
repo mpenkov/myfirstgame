@@ -21,6 +21,7 @@ local love = require "love"
 Player = require("Player")
 Ground = require("Ground")
 Air = require("Air")
+Menu = require("Menu")
 
 require "core"
 
@@ -33,6 +34,37 @@ function love.load()
     _G.ground = Ground()
     _G.air = Air()
 
+    _G.planes = {}
+    planes["Су-27"] = {
+        filename = "sprites/su27-64-camo.png",
+        spriteWidth = 64,
+        spriteHeight = 64,
+    }
+    planes["Су-27 «Русские Витязи»"] = {
+        filename = "sprites/su27-64.png",
+        spriteWidth = 64,
+        spriteHeight = 64,
+    }
+    planes["МиГ-21"] = {
+        filename = "sprites/samolet-32.png",
+        spriteWidth = 32,
+        spriteHeight = 32,
+    }
+    planes["Ф-15"] = {
+        filename = "sprites/f15-64.png",
+        spriteWidth = 64,
+        spriteHeight = 64,
+    }
+
+    for key, val in pairs(planes) do
+        val["sprite"] = love.graphics.newImage(val.filename)
+    end
+
+    --
+    -- Nb. the menu needs the above plane info to be populated
+    --
+    _G.menu = Menu()
+
     if false then
         local enemy = air:addEnemy()
         enemy.x = love.graphics.getWidth() / 2
@@ -42,8 +74,19 @@ function love.load()
 end
 
 function love.update(dt)
+    if menu.show then
+        menu:update(dt)
+        return
+    end
+
     ground:update(dt)
     air:update(dt)
+
+    if love.keyboard.isDown("escape") then
+        menu.show = true
+    end
+
+    player:morph(menu:getCurrentPlane())
 
     if player.active then
         player:update(dt)
@@ -77,8 +120,12 @@ function love.update(dt)
 end
 
 function love.draw()
-    ground:draw()
-    air:draw()
+    if menu.show then
+        menu:draw()
+    else
+        ground:draw()
+        air:draw()
+    end
 end
 
 function destroy(thing)

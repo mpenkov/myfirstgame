@@ -5,9 +5,6 @@ function Player()
     local defaultHealth = 5
 
     if false then
-        sprite = love.graphics.newImage("sprites/samolet-32.png")
-        spriteWidth = 32
-        spriteHeight = 32
         defaultHealth = 10000
     end
 
@@ -42,6 +39,13 @@ function Player()
             if self.health <= 0 then
                 destroy(self)
             end
+        end,
+
+        morph = function(self, key)
+            local p = _G.planes[key]
+            sprite = p.sprite
+            spriteWidth = p.spriteWidth
+            spriteHeight = p.spriteHeight
         end,
     }
 end

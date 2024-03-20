@@ -37,9 +37,10 @@ local enemyUpdate = function(self, dt)
     --
     -- we've moved off-screen, teleport to a new position
     --
-    if self.x < 0 or self.x > screenWidth or self.y > screenHeight then
+    local maxX, maxY = screenWidth - self.width, screenHeight - self.height
+    if self.x < 0 or self.x > maxX or self.y > maxY then
         self.y = math.random(-256, -128)
-        self.x = math.random(screenWidth)
+        self.x = math.random(maxX)
         self.speed = math.random(100, 250)
     end
 
