@@ -1,10 +1,28 @@
+--[[
+
+Ideas:
+
+- Different weapons: single fire, alternate fire, double fire, triple fire...
+- Dead enemies sometimes drop a weapons bonus
+- Fuel dynamic: must destroy enemy wave before fuel runs out, and an Il-78 tanker comes to refuel you between attack waves
+- Health dynamic: dead enemies sometimes drop health bonus
+- Increase enemy difficulty after each wave (less stupid, more evasive) 
+- Boss fights (F-35, F-22, B-1, B-52)
+- More enemy aircraft (F-14, F-16, F-18, F-117, Mirage-2000, Rafale)
+- Ground fire from SAMs
+- Maverick-like canyon game mode
+- Tu-22 backfire game mode (fighters attacking from behind, SAMs from ahead)
+- Su-25 attack mode (attacking ground targets only)
+- Different terrain (snow, water, desert)
+- Menu to select planes, terrain, game mode
+
+--]]
 local love = require "love"
 Player = require("Player")
 Ground = require("Ground")
 Air = require("Air")
 
 require "core"
-
 
 function love.load()
     love.math.setRandomSeed(love.timer.getTime())
@@ -37,10 +55,24 @@ function love.update(dt)
         player.lastMissile = love.timer.getTime()
     else
         --
-        -- forces enemies to GTFO early, making for a more interesting scene
+        -- Keep some enemies on the screen to keep it interesting
         --
-        player.x = love.graphics.getWidth() / 2
-        player.y = love.graphics.getHeight() / 4
+        local counter = 0
+        for key, enemy in pairs(air.enemies) do
+            if enemy and enemy.active then
+                counter = counter + 1
+            end
+        end
+
+        air:addEnemies(5 - counter)
+
+        for key, enemy in pairs(air.enemies) do
+            if enemy and enemy.active then
+                enemy.stupid = false
+                enemy.stalker = false
+            end
+        end
+
     end
 end
 
@@ -57,8 +89,8 @@ function destroy(thing)
 
     for k = 1, math.random(1, 5) do
         -- set the center of the explosion to center of the thing that exploded
-        local x = thing.x + thing.width * math.random(-1, 1)
-        local y = thing.y + thing.height * math.random(-1, 1)
+        local x = thing.x + thing.width * math.random(0.35, 0.65)
+        local y = thing.y + thing.height * math.random(0.35, 0.65)
         air:addExplosion(x, y, color)
     end
 

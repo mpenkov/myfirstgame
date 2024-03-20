@@ -8,13 +8,10 @@ local enemyUpdate = function(self, dt)
     -- if we're evasive and being fired upon, move away
     --
     self.y = self.y + self.speed * dt
-    if self.y + self.width > player.y then
-        local x = self.x - (player.x - self.x) * dt
-        if self.stupid or self:checkSafe(x, self.y) then
-            self.x = x
-        end
-
-        self.speed = self.speed * 1.1
+    if not player.active and self.y > 256 then
+        self:gtfo(dt)
+    elseif self.y + self.width > player.y then
+        self:gtfo(dt)
     elseif self.stalker then
         local x = self.x + (player.x - self.x) * dt
         if self.stupid or self:checkSafe(x, self.y) then
@@ -52,7 +49,13 @@ local enemyUpdate = function(self, dt)
     if self.y > 0 and self.lastMissile < now - self.reloadTime then
         if player.active and love.math.random() < self.triggerHappiness then
             self.lastMissile = now
-            air:addMissile(self.x + self.width / 2, self.y + self.height, false)
+            local msl = air:addMissile(self.x + self.width / 2, self.y + self.height, false)
+
+            --
+            -- Nb. prevent enemies from killing themselves by accelerating
+            -- into missiles they have just fired
+            --
+            msl.owner = self
         end
     end
 end
@@ -128,6 +131,15 @@ function Enemy()
             -- something large enough to mean "no incoming missile"
             --
             return 1000000
+        end,
+
+        -- leave the game area with speed
+        gtfo = function(self, dt)
+            local x = self.x - (player.x - self.x) * dt
+            if self:checkSafe(x, self.y) then
+                self.x = x
+            end
+            self.speed = self.speed * 1.1
         end,
     }
 end

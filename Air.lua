@@ -79,9 +79,11 @@ function Air()
 
                     -- enemy missiles can hurt other enemies, too
                     for key, enemy in pairs(enemies) do
-                        if enemy and enemy.active and collision(msl, enemy) then
-                            enemy:hit(msl)
-                            break
+                        if enemy and enemy.active and msl.owner ~= enemy then
+                            if collision(msl, enemy) then
+                                enemy:hit(msl)
+                                break
+                            end
                         end
                     end
 
@@ -114,7 +116,7 @@ function Air()
 
         end,
 
-        draw=function(self)
+        draw = function(self)
             love.graphics.setColor(1, 1, 1)
             for key, cloud in pairs(clouds) do
                 love.graphics.draw(cloudSprite.image, cloud.x, cloud.y, 0, cloud.scale)
@@ -182,6 +184,9 @@ function Air()
         end,
 
         addEnemies = function(self, number)
+            --
+            -- TODO: pick a safe place to add the new enemy
+            --
             local spacing = love.graphics.getWidth() / (number + 1)
             for i = 1, number do
                 local enemy = self.addEnemy()
@@ -198,6 +203,7 @@ function Air()
                 msl.speed = -1000
             end
             table.insert(missiles, msl)
+            return msl
         end,
     }
 end
