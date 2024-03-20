@@ -41,10 +41,6 @@ local menuOptions = function()
     _G.menu.screen = "options"
 end
 
-local menuChangeMap = function()
-    print("change map")
-end
-
 local menuOptionsBack = function()
     _G.menu.screen = "main"
 end
@@ -93,6 +89,12 @@ function Menu()
         end
     end
 
+    local maps = {}
+    for key, val in pairs(_G.terrain) do
+        table.insert(maps, key)
+    end
+    local currentMap = 1
+
     local lastEvent = love.timer.getTime()
     local buttons = {}
     local spacing = 20
@@ -108,15 +110,11 @@ function Menu()
     table.insert(buttons["main"], btnQuit)
     spaceVertically(buttons["main"], spacing)
 
-    local changePlane = function()
-        currentPlane = currentPlane + 1
-        if currentPlane > #planes then
-            currentPlane = 1
-        end
-    end
+    local changePlane = function() currentPlane = wrap(currentPlane + 1, #planes) end
+    local changeMap = function() currentMap = wrap(currentMap + 1, #maps) end
 
     local btnChangePlane = Button(btnGo.x, btnGo.y, 10, 15, "Сменить самолёт", changePlane)
-    local btnChangeMap = Button(0, 0, 10, 15, "Сменить карту", menuOptionsChangeMap)
+    local btnChangeMap = Button(0, 0, 10, 15, "Сменить карту", changeMap)
 
     local btnOptionsBack = Button(0, 0, 10, 15, "Назад", menuOptionsBack)
 
@@ -134,7 +132,7 @@ function Menu()
     labels["options"] = {}
 
     local lblCurrentPlane = label(btnGo.x + btnGo.width + spacing, btnGo.y, planes[currentPlane])
-    local lblCurrentMap = label("TODO")
+    local lblCurrentMap = label(0, 0, maps[currentMap])
 
     table.insert(labels["options"], lblCurrentPlane)
     table.insert(labels["options"], lblCurrentMap)
@@ -158,6 +156,7 @@ function Menu()
 
         update = function(self, dt)
             lblCurrentPlane.text = planes[currentPlane]
+            lblCurrentMap.text = maps[currentMap]
         end,
 
         keypressed = function(self, key, scancode, isrepeat)
@@ -191,10 +190,9 @@ function Menu()
         end,
 
         getCurrentPlane = function(self) return planes[currentPlane] end,
+        getCurrentMap = function(self) return maps[currentMap] end,
     }
 end
-
-
 
 
 return Menu

@@ -33,7 +33,6 @@ function love.load()
     love.mouse.setVisible(false)
 
     _G.player = Player()
-    _G.ground = Ground()
     _G.air = Air()
 
     _G.planes = {}
@@ -73,10 +72,26 @@ function love.load()
         val["sprite"] = love.graphics.newImage(val.filename)
     end
 
+    _G.terrain = {}
+    terrain["Трава"] = {
+        filename = "sprites/green.png",
+        spriteWidth = 128,
+        spriteHeight = 128,
+    }
+    terrain["Снег"] = {
+        filename = "sprites/snow.png",
+        spriteWidth = 128,
+        spriteHeight = 128,
+    }
+    for key, val in pairs(terrain) do
+        val["sprite"] = love.graphics.newImage(val.filename)
+    end
+
     --
-    -- Nb. the menu needs the above plane info to be populated
+    -- Nb. the menu/ground needs the above plane and terrain info to be populated
     --
     _G.menu = Menu()
+    _G.ground = Ground()
 
     if false then
         local enemy = air:addEnemy()
@@ -92,6 +107,7 @@ function love.update(dt)
         return
     end
 
+    ground:setTerrain(menu:getCurrentMap())
     ground:update(dt)
     air:update(dt)
 

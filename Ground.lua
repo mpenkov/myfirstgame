@@ -1,16 +1,24 @@
-function Ground(backgroundFilename)
-    backgroundFilename = backgroundFilename or "sprites/green.png" 
-    bg = {
-        image = love.graphics.newImage(backgroundFilename),
-        y = 0,
-        speed = 500,
-    }
-    bg.batch = love.graphics.newSpriteBatch(bg.image)
+local newBatch = function(sprite, width, height) 
+    local batch = love.graphics.newSpriteBatch(sprite)
+
+    --
+    -- TODO:
+    -- We can probably reduce this slightly, we only need to cover the entire
+    -- screen plus one row.
+    --
     for i = 1, 16 do
         for j = 1, 16 do
-            bg.batch:add((i - 1) * 128, (j - 1) * 128)
+            batch:add((i - 1) * width, (j - 1) * height)
         end
     end
+
+    return batch
+end
+
+function Ground(backgroundFilename)
+    local terrain = _G.terrain["Трава"]
+    local batch = newBatch(terrain.sprite, terrain.spriteWidth, terrain.spriteHeight)
+    local bg = {speed = 500, y = 0}
 
     local boomSprite = {
         image = love.graphics.newImage("sprites/boom.png"),
@@ -62,7 +70,7 @@ function Ground(backgroundFilename)
 
             -- the -128 is so that part of the background is always off-screen,
             -- otherwise we get a flickering black band
-            love.graphics.draw(bg.batch, 0, bg.y - 128)
+            love.graphics.draw(batch, 0, bg.y - 128)
 
             for key, crater in pairs(craters) do
                 if crater and crater.active and crater.frame >= 1 then
@@ -92,6 +100,11 @@ function Ground(backgroundFilename)
                 gexpl.speed = 3.5
                 table.insert(craters, gexpl)
             end
+        end,
+
+        setTerrain = function(self, terr)
+            local terrain = _G.terrain[terr]
+            batch = newBatch(terrain.sprite, terrain.spriteWidth, terrain.spriteHeight)
         end,
     }
 end
