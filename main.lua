@@ -2,19 +2,21 @@
 
 Ideas:
 
-- Different weapons: single fire, alternate fire, double fire, triple fire...
-- Dead enemies sometimes drop a weapons bonus
-- Fuel dynamic: must destroy enemy wave before fuel runs out, and an Il-78 tanker comes to refuel you between attack waves
-- Health dynamic: dead enemies sometimes drop health bonus
-- Increase enemy difficulty after each wave (less stupid, more evasive) 
-- Boss fights (F-35, F-22, B-1, B-52)
-- More enemy aircraft (F-14, F-16, F-18, F-117, Mirage-2000, Rafale)
-- Ground fire from SAMs
-- Maverick-like canyon game mode
-- Tu-22 backfire game mode (fighters attacking from behind, SAMs from ahead)
-- Su-25 attack mode (attacking ground targets only)
-- Different terrain (snow, water, desert)
-- Menu to select planes, terrain, game mode
+- [ ] Different weapons: single fire, alternate fire, double fire, triple fire...
+- [ ] Dead enemies sometimes drop a weapons bonus
+- [ ] Limit ammo
+- [ ] Fuel dynamic: must destroy enemy wave before fuel runs out, and an Il-78 tanker comes to refuel you between attack waves
+- [ ] Health dynamic: dead enemies sometimes drop health bonus
+- [ ] Increase enemy difficulty after each wave (less stupid, more evasive)
+- [ ] Boss fights (F-35, F-22, B-1, B-52, circling Reaper drones)
+- [ ] More enemy aircraft (F-14, F-16, F-18, F-117, Mirage-2000, Rafale)
+- [ ] Ground fire from SAMs
+- [ ] Maverick-like canyon game mode
+- [ ] Tu-22 backfire game mode (fighters attacking from behind, SAMs from ahead)
+- [ ] Su-25 attack mode (attacking ground targets only)
+- [ ] Different terrain (snow, water, desert)
+- [.] Menu to select planes, terrain, game mode
+- [ ] sounds
 
 --]]
 local love = require "love"
@@ -52,6 +54,11 @@ function love.load()
     }
     planes["Ф-15"] = {
         filename = "sprites/f15-64.png",
+        spriteWidth = 64,
+        spriteHeight = 64,
+    }
+    planes["Т-4 «Красные Дельфины»"] = {
+        filename = "sprites/t-4 red dolphin.png",
         spriteWidth = 64,
         spriteHeight = 64,
     }

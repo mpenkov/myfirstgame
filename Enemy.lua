@@ -92,6 +92,22 @@ function Enemy()
 
             love.graphics.setColor(1, 1, 1)
             love.graphics.draw(sprite, self.x, self.y, math.pi, sx, sy, ox, oy)
+
+            --[[
+            local bubbles = (5 - self.health) * 3
+            local radius = 3
+            local intensity = 0.9
+            local smoke_x = self.x + self.width / 2
+            local smoke_y = self.y - self.height / 8
+
+            for i = 1, bubbles do
+                love.graphics.setColor(intensity, intensity, intensity)
+                love.graphics.circle("line", smoke_x, smoke_y, radius)
+                intensity = intensity - 0.1
+                smoke_y = smoke_y - radius * 2
+                radius = radius * 1.15
+            end
+            ]]
         end,
 
         hit = function(self, msl)
