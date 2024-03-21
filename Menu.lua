@@ -175,13 +175,16 @@ function Menu()
             --
             if key == "down" then
                 sel[self.screen] = wrap(sel[self.screen] + 1, #buttons[self.screen])
+                sfx:playEffect("ping")
             elseif key == "up" then
                 sel[self.screen] = wrap(sel[self.screen] - 1, #buttons[self.screen])
+                sfx:playEffect("ping")
             elseif key == "space" or key == "return" then
                 local idx = sel[self.screen]
                 local btn = buttons[self.screen][idx]
                 if btn.fn then
                     btn.fn(btn.fn_args)
+                    sfx:playEffect("ping")
                 end
             end
 
@@ -191,10 +194,12 @@ function Menu()
             if self.screen == "main" then
                 if key == "escape" then
                     menuHide()
+                    sfx:playEffect("ping")
                 end
             elseif self.screen == "options" then
                 if key == "escape" then
                     menuOptionsBack()
+                    sfx:playEffect("ping")
                 end
             end
         end,

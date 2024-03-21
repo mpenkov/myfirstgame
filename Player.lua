@@ -42,6 +42,10 @@ function Player()
             else
                 sfx:playEffect("player_hit")
             end
+
+            if self.health == 1 then
+                sfx:playEffect("alarm")
+            end
         end,
 
         morph = function(self, key)
