@@ -149,7 +149,7 @@ function Air()
                     love.graphics.setColor(1, 0, 0)
                     love.graphics.rectangle("fill", msl.x, msl.y, msl.width, msl.height)
                 elseif msl and msl.active then
-                    love.graphics.setColor(0.9, 0.3, 0.9)
+                    love.graphics.setColor(0, 0, 1)
                     love.graphics.rectangle("fill", msl.x, msl.y, msl.width, msl.height)
                 end
             end

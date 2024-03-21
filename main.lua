@@ -24,6 +24,7 @@ Player = require("Player")
 Ground = require("Ground")
 Air = require("Air")
 Menu = require("Menu")
+SFX = require("SFX")
 
 require "core"
 
@@ -32,6 +33,7 @@ function love.load()
     love.graphics.setDefaultFilter("nearest", "nearest", 1)
     love.mouse.setVisible(false)
 
+    _G.sfx = SFX()
     _G.player = Player()
     _G.air = Air()
 

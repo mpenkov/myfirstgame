@@ -112,14 +112,17 @@ function Menu()
 
     local changePlane = function() currentPlane = wrap(currentPlane + 1, #planes) end
     local changeMap = function() currentMap = wrap(currentMap + 1, #maps) end
+    local toggleSound = function() sfx.enabled = not sfx.enabled end
 
     local btnChangePlane = Button(btnGo.x, btnGo.y, 10, 15, "Сменить самолёт", changePlane)
     local btnChangeMap = Button(0, 0, 10, 15, "Сменить карту", changeMap)
+    local btnToggleSound = Button(0, 0, 10, 15, "Звук", toggleSound)
 
     local btnOptionsBack = Button(0, 0, 10, 15, "Назад", menuOptionsBack)
 
     table.insert(buttons["options"], btnChangePlane)
     table.insert(buttons["options"], btnChangeMap)
+    table.insert(buttons["options"], btnToggleSound)
     table.insert(buttons["options"], btnOptionsBack)
     spaceVertically(buttons["options"], spacing)
 
@@ -133,9 +136,11 @@ function Menu()
 
     local lblCurrentPlane = label(btnGo.x + btnGo.width + spacing, btnGo.y, planes[currentPlane])
     local lblCurrentMap = label(0, 0, maps[currentMap])
+    local lblSound = label(0, 0, "")
 
     table.insert(labels["options"], lblCurrentPlane)
     table.insert(labels["options"], lblCurrentMap)
+    table.insert(labels["options"], lblSound)
     spaceVertically(labels["options"], spacing)
 
     return {
@@ -157,6 +162,11 @@ function Menu()
         update = function(self, dt)
             lblCurrentPlane.text = planes[currentPlane]
             lblCurrentMap.text = maps[currentMap]
+            if sfx.enabled then
+                lblSound.text = "Включить"
+            else
+                lblSound.text = "Выключить"
+            end
         end,
 
         keypressed = function(self, key, scancode, isrepeat)

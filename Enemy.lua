@@ -116,6 +116,9 @@ function Enemy()
             air:addExplosion(msl.x, msl.y)
             if self.health <= 0 then
                 destroy(self)
+                sfx:playEffect("enemy_destroyed")
+            else
+                sfx:playEffect("enemy_hit")
             end
         end,
 

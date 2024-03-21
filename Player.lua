@@ -38,6 +38,9 @@ function Player()
             self.health = self.health - 1
             if self.health <= 0 then
                 destroy(self)
+                sfx:playEffect("player_destroyed")
+            else
+                sfx:playEffect("player_hit")
             end
         end,
 
@@ -87,6 +90,8 @@ function playerUpdate(self, dt)
         end
         air:addMissile(x, self.y, true)
         self.lastMissile = now
+
+        sfx:playEffect("player_fire")
     end
 
     -- collision between us and the enemy kills both
@@ -94,6 +99,7 @@ function playerUpdate(self, dt)
         if enemy and enemy.active and collision(player, enemy) then
             destroy(player)
             destroy(enemy)
+            sfx:playEffect("player_destroyed")
         end
     end
 end
