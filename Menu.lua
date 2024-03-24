@@ -10,7 +10,7 @@ function Button(x, y, tox, toy, text, fn, fnargs)
         selcolor = {1.0, 0.5, 0.5},
         bgcolor = {0.7, 0.7, 0.7},
         fgcolor = {0, 0, 0},
-        font = love.graphics.newFont("fonts/FreeMono.ttf", 32),
+        font = fonts.large,
         selected = false,
         fn = fn,
         fn_args = fn_args,

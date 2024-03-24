@@ -32,6 +32,15 @@ function HUD()
                 200,
                 "left"
             )
+
+            love.graphics.printf(
+                "сбито: " .. _G.kills,
+                self.font,
+                self.x + 400,
+                self.y,
+                200,
+                "left"
+            )
         end,
     }
 end

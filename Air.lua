@@ -1,5 +1,95 @@
 Enemy = require("Enemy")
 
+function itemAmmo(x, y, volume)
+    volume = volume or 50
+    return {
+        x = x,
+        y = y,
+        volume = volume,
+        width = 50,
+        height = 50,
+
+        update = function(self, dt)
+            self.y = self.y + ground.speed * dt
+        end,
+
+        draw = function(self, dt)
+            cx = self.x + self.width / 2
+            cy = self.y + self.height / 2
+            love.graphics.setColor(0, 0, 1)
+            love.graphics.circle("fill", cx, cy, self.width / 2)
+            love.graphics.setColor(0, 0, 0.8)
+            love.graphics.circle("fill", cx, cy, self.width / 2 - 8)
+            love.graphics.setColor(0, 0, 0)
+            love.graphics.circle("line", cx, cy, self.width / 2)
+        end,
+
+        apply = function(self)
+            player.ammo = player.ammo + self.volume
+        end
+    }
+end
+
+function itemHealth(x, y, volume)
+    volume = volume or 5
+    return {
+        x = x,
+        y = y,
+        volume = 5,
+        width = 50,
+        height = 50,
+
+        update = function(self, dt)
+            self.y = self.y + ground.speed * dt
+        end,
+
+        draw = function(self, dt)
+            cx = self.x + self.width / 2
+            cy = self.y + self.height / 2
+            love.graphics.setColor(0, 1, 1)
+            love.graphics.circle("fill", cx, cy, self.width / 2)
+            love.graphics.setColor(0, 0.8, 0.8)
+            love.graphics.circle("fill", cx, cy, self.width / 2 - 8)
+            love.graphics.setColor(0, 0, 0)
+            love.graphics.circle("line", cx, cy, self.width / 2)
+        end,
+
+        apply = function(self)
+            player.health = math.min(player.health + self.volume, 10)
+        end
+    }
+end
+
+function itemWeapon(x, y)
+    return {
+        x = x,
+        y = y,
+        volume = 5,
+        width = 50,
+        height = 50,
+
+        update = function(self, dt)
+            self.y = self.y + ground.speed * dt
+        end,
+
+        draw = function(self, dt)
+            cx = self.x + self.width / 2
+            cy = self.y + self.height / 2
+            love.graphics.setColor(1, 0, 1)
+            love.graphics.circle("fill", cx, cy, self.width / 2)
+            love.graphics.setColor(0.8, 0, 0.8)
+            love.graphics.circle("fill", cx, cy, self.width / 2 - 8)
+            love.graphics.setColor(0, 0, 0)
+            love.graphics.circle("line", cx, cy, self.width / 2)
+        end,
+
+        apply = function(self)
+            player.weapon = RandomWeapon()
+        end
+    }
+end
+
+
 function Air()
     local boomSprite = {
         image = love.graphics.newImage("sprites/boom.png"),
@@ -42,11 +132,13 @@ function Air()
     local explosions = {}
     local missiles = {}
     local enemies = {}
+    local items = {}
 
     return {
         player = player,
         enemies = enemies,
         missiles = missiles,
+        items = items,
 
         update = function(self, dt)
             for key, cloud in pairs(clouds) do
@@ -100,6 +192,31 @@ function Air()
                 end
             end
 
+            -- update items, which move at the same speed as the ground
+            local itemCount = 0
+            for key, item in pairs(items) do
+                if item then
+                    itemCount = itemCount + 1
+                    item:update(dt)
+
+                    if player.active and collision(item, player) then
+                        item:apply()
+                        items[key] = nil
+                    end
+
+                    if item.y > love.graphics.getHeight() then
+                        items[key] = nil
+                    end
+                end
+            end
+
+            --
+            -- Give the player more ammo if they've run out
+            --
+            if itemCount == 0 and player.ammo <= 0 and math.random() > 0.99 then
+                self:addItem(math.random(love.graphics.getWidth()), 0, "ammo")
+            end
+
             -- update explosions
             for key, expl in pairs(explosions) do
                 if expl and expl.active then
@@ -113,6 +230,7 @@ function Air()
                     explosions[key] = nil
                 end
             end
+
 
         end,
 
@@ -168,6 +286,12 @@ function Air()
                     )
                 end
             end
+
+            for key, item in pairs(items) do
+                if item then
+                    item:draw()
+                end
+            end
         end,
 
         addExplosion = function(self, x, y, color)
@@ -204,6 +328,16 @@ function Air()
             end
             table.insert(missiles, msl)
             return msl
+        end,
+
+        addItem = function(self, x, y, kind)
+            if kind == "ammo" then
+                table.insert(items, itemAmmo(x, y))
+            elseif kind == "health" then
+                table.insert(items, itemHealth(x, y))
+            elseif kind == "weapon" then
+                table.insert(items, itemWeapon(x, y))
+            end
         end,
     }
 end

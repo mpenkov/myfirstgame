@@ -25,6 +25,7 @@ Ground = require("Ground")
 Air = require("Air")
 Menu = require("Menu")
 SFX = require("SFX")
+HUD = require("HUD")
 
 require "core"
 
@@ -33,9 +34,14 @@ function love.load()
     love.graphics.setDefaultFilter("nearest", "nearest", 1)
     love.mouse.setVisible(false)
 
+    _G.kills = 0
     _G.sfx = SFX()
     _G.player = Player()
     _G.air = Air()
+    _G.fonts = {
+        medium = love.graphics.newFont("fonts/FreeMono.ttf", 24),
+        large = love.graphics.newFont("fonts/FreeMono.ttf", 32),
+    }
 
     _G.planes = {}
     planes["Су-27"] = {
@@ -92,6 +98,7 @@ function love.load()
     --
     _G.menu = Menu()
     _G.ground = Ground()
+    _G.hud = HUD()
 
     if false then
         _G.menu.show = false
@@ -155,14 +162,7 @@ function love.keypressed(key, scancode, isrepeat)
         sfx:playEffect("ping")
         menu.show = true
     elseif not player.active and key == "return" then
-        --
-        -- respawn player
-        --
-        player.x = love.graphics.getWidth() / 2
-        player.y = love.graphics.getHeight() - 2*player.width
-        player.active = true
-        player.health = 5
-        player.lastMissile = love.timer.getTime()
+        player:respawn()
     end
 end
 
@@ -172,6 +172,7 @@ function love.draw()
     else
         ground:draw()
         air:draw()
+        hud:draw()
     end
 end
 

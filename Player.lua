@@ -1,3 +1,109 @@
+function singleCannon()
+    lastMissile = 0
+    reloadTime = 0.15
+
+    return {
+        offset = 8,
+        fire = function(self)
+            local now = love.timer.getTime()
+            if player.ammo > 0 and now - lastMissile > reloadTime then
+                air:addMissile(player.x + player.width / 2 + self.offset, player.y, true)
+                lastMissile = now
+                player.ammo = player.ammo - 1
+
+                sfx:playEffect("player_fire")
+            end
+        end
+    }
+end
+
+function altCannon()
+    hardpoint = 0
+    lastMissile = 0
+    reloadTime = 0.20
+
+    return {
+        offset = 8,
+        fire = function(self)
+            local now = love.timer.getTime()
+            if player.ammo > 0 and now - lastMissile > reloadTime then
+                local x = player.x + self.offset
+                if hardpoint == 0 then
+                    hardpoint = 1
+                else
+                    x = player.x + player.width - self.offset
+                    hardpoint = 0
+                end
+                air:addMissile(x, player.y, true)
+                lastMissile = now
+                player.ammo = player.ammo - 1
+
+                sfx:playEffect("player_fire")
+            end
+        end,
+    }
+end
+
+function dualCannon()
+    lastMissile = 0
+    reloadTime = 0.4
+
+    return {
+        offset = 24,
+        fire = function(self)
+            local now = love.timer.getTime()
+            if player.ammo > 0 and now - lastMissile > reloadTime then
+                local x1 = player.x + self.offset
+                local x2 = player.x + player.width - self.offset
+                air:addMissile(x1, player.y, true)
+                air:addMissile(x2, player.y, true)
+                lastMissile = now
+                player.ammo = player.ammo - 2
+
+                sfx:playEffect("player_fire")
+            end
+        end,
+    }
+end
+
+function tripleCannon()
+    lastMissile = 0
+    reloadTime = 0.6
+
+    return {
+        offset = 28,
+        fire = function(self)
+            local now = love.timer.getTime()
+            if player.ammo > 0 and now - lastMissile > reloadTime then
+                local x1 = player.x + self.offset
+                local x2 = player.x + player.width / 2
+                local x3 = player.x + player.width - self.offset
+                air:addMissile(x1, player.y, true)
+                air:addMissile(x2, player.y, true)
+                air:addMissile(x3, player.y, true)
+                lastMissile = now
+                player.ammo = player.ammo - 3
+
+                sfx:playEffect("player_fire")
+            end
+        end,
+    }
+end
+
+function RandomWeapon()
+    -- TODO: make sure the new weapon is different from the current one
+    dice = math.random(4)
+    if dice < 1 then
+        return singleCannon()
+    elseif dice < 2 then
+        return altCannon()
+    elseif dice < 3 then
+        return dualCannon()
+    else
+        return tripleCannon()
+    end
+end
+
 function Player()
     local sprite = love.graphics.newImage("sprites/su27-64-camo.png")
     local spriteWidth = 64
@@ -24,9 +130,8 @@ function Player()
             {x = 4, y = 64, width = 120, height = 64},
         },
         speed = 500,
-        hardpoint = 0,
-        lastMissile = 0,
-        reloadTime = 0.1,
+        ammo = 50,
+        weapon = singleCannon(),
         health = defaultHealth,
         active = true,
 
@@ -43,8 +148,8 @@ function Player()
             missile.active = false
             air:addExplosion(missile.x, missile.y, {1, 1, 0.8})
 
-            self.health = self.health - 1
-            if self.health <= 0 then
+            self.health = math.max(0, self.health - 1)
+            if self.health == 0 then
                 destroy(self)
                 sfx:playEffect("player_destroyed")
             else
@@ -61,6 +166,15 @@ function Player()
             sprite = p.sprite
             spriteWidth = p.spriteWidth
             spriteHeight = p.spriteHeight
+        end,
+
+        respawn = function(self)
+            self.x = love.graphics.getWidth() / 2
+            self.y = love.graphics.getHeight() - 2*self.width
+            self.active = true
+            self.health = 5
+            self.ammo = 50
+            player.weapon = singleCannon()
         end,
     }
 end
@@ -91,19 +205,9 @@ function playerUpdate(self, dt)
     self.y = math.min(self.y, love.graphics.getHeight() - self.height)
 
     -- fire ze missiles
-    local now = love.timer.getTime()
-    if love.keyboard.isDown("space") and now - self.lastMissile > self.reloadTime then
-        local x = self.x
-        if self.hardpoint == 0 then
-            self.hardpoint = 1
-        else
-            x = self.x + self.width
-            self.hardpoint = 0
-        end
-        air:addMissile(x, self.y, true)
-        self.lastMissile = now
+    if love.keyboard.isDown("space") then
+        player.weapon:fire()
 
-        sfx:playEffect("player_fire")
     end
 
     -- collision between us and the enemy kills both

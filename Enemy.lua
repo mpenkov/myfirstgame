@@ -31,6 +31,10 @@ local enemyUpdate = function(self, dt)
         if other and other.active and other ~= self and collision(self, other) then
             destroy(self)
             destroy(other)
+
+            if math.random() > 0.5 then
+                air:addItem(self.x, self.y)
+            end
         end
     end
 
@@ -123,11 +127,23 @@ function Enemy()
             self.health = self.health - 1
             air:addExplosion(msl.x, msl.y)
             if self.health <= 0 then
+                _G.kills = _G.kills + 1
                 destroy(self)
                 sfx:playEffect("enemy_destroyed")
+
+                if math.random() > 0.8 then
+                    air:addItem(self.x, self.y, "health")
+                elseif math.random() > 0.8 then
+                    air:addItem(self.x, self.y, "ammo")
+                end
+
+                if _G.kills % 5 == 0 and _G.kills > 1 then
+                    air:addItem(self.x, self.y, "weapon")
+                end
             else
                 sfx:playEffect("enemy_hit")
             end
+
         end,
 
         -- returns true if it's save for us to move to these co-ordinates

@@ -40,6 +40,8 @@ function Ground(backgroundFilename)
 
     craters = {}
     return {
+        speed = bg.speed,
+
         update = function(self, dt)
             local screenWidth = love.graphics.getWidth()
             local screenHeight = love.graphics.getHeight()
