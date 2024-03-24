@@ -180,7 +180,7 @@ function Air()
                     end
 
                     -- only enemy missiles can hurt the player
-                    if not msl.ours and collision(msl, player) then
+                    if not msl.ours and player.active and collision(msl, player) then
                         player:hit(msl)
                     end
 

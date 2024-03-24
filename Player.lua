@@ -150,6 +150,7 @@ function Player()
 
             self.health = math.max(0, self.health - 1)
             if self.health == 0 then
+                _G.losses = _G.losses + 1
                 destroy(self)
                 sfx:playEffect("player_destroyed")
             else
@@ -212,7 +213,9 @@ function playerUpdate(self, dt)
 
     -- collision between us and the enemy kills both
     for key, enemy in pairs(air.enemies) do
-        if enemy and enemy.active and collision(player, enemy) then
+        if enemy and enemy.active and player.active and collision(player, enemy) then
+            _G.kills = _G.kills + 1
+            _G.losses = _G.losses + 1
             destroy(player)
             destroy(enemy)
             sfx:playEffect("player_destroyed")

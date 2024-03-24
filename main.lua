@@ -34,6 +34,7 @@ function love.load()
     love.graphics.setDefaultFilter("nearest", "nearest", 1)
     love.mouse.setVisible(false)
 
+    _G.losses = 0
     _G.kills = 0
     _G.sfx = SFX()
     _G.player = Player()

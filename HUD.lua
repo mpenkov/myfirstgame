@@ -41,6 +41,14 @@ function HUD()
                 200,
                 "left"
             )
+            love.graphics.printf(
+                "потери: " .. _G.losses,
+                self.font,
+                self.x + 600,
+                self.y,
+                200,
+                "left"
+            )
         end,
     }
 end
