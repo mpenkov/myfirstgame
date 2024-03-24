@@ -33,7 +33,7 @@ function Air()
         local c = {
             x = math.random(screenWidth),
             y = math.random(screenHeight),
-            speed = math.random(512, 1536), 
+            speed = math.random(512, 1536),
             scale = math.random(2, 4),
         }
         table.insert(clouds, c)

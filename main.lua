@@ -63,10 +63,8 @@ function love.load()
         spriteWidth = 64,
         spriteHeight = 64,
     }
+
     if false then
-        player.sprite = love.graphics.newImage("sprites/samolet-32.png")
-        player.spriteWidth = 32
-        player.spriteHeight = 32
         player.health = 10000
     end
 
@@ -96,8 +94,15 @@ function love.load()
     _G.ground = Ground()
 
     if false then
+        _G.menu.show = false
         local enemy = air:addEnemy()
         enemy.x = love.graphics.getWidth() / 2
+        enemy.y = love.graphics.getHeight() / 3
+        enemy.speed = 0
+        enemy.triggerHappiness = 0
+        enemy.stalker = false
+        enemy.evasive = false
+        enemy.stupid = false
     else
         air:addEnemies(math.random(1, 5))
     end

@@ -8,9 +8,9 @@ local enemyUpdate = function(self, dt)
     -- if we're evasive and being fired upon, move away
     --
     self.y = self.y + self.speed * dt
-    if not player.active and self.y > 256 then
+    if not player.active and self.y > 256 and self.speed > 0 then
         self:gtfo(dt)
-    elseif self.y + self.width > player.y then
+    elseif self.y + self.width > player.y and self.speed > 0 then
         self:gtfo(dt)
     elseif self.stalker then
         local x = self.x + (player.x - self.x) * dt
@@ -47,6 +47,7 @@ local enemyUpdate = function(self, dt)
     --
     -- fire ze missiles
     --
+    local now = love.timer.getTime()
     if self.y > 0 and self.lastMissile < now - self.reloadTime then
         if player.active and love.math.random() < self.triggerHappiness then
             self.lastMissile = now
@@ -74,6 +75,13 @@ function Enemy()
         y = math.random(-512, -256),
         width = 128,
         height = 128,
+        --
+        -- enemy is upside down, so hitboxes are upside down, too
+        --
+        hitboxes = {
+            {x = 48, y = 0, width = 32, height = 128},
+            {x = 4, y = 0, width = 120, height = 64},
+        },
         lastMissile = 0,
         reloadTime = 0.5,
         triggerHappiness = 0.25,

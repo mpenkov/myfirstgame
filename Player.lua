@@ -15,6 +15,14 @@ function Player()
         y = love.graphics.getHeight() - height * 2,
         width = width,
         height = height,
+        --
+        -- There are two hitboxes, one for the fuselage (lengthwise) and one
+        -- for the wings (breadthwise).
+        --
+        hitboxes = {
+            {x = 48, y = 0, width = 32, height = 128},
+            {x = 4, y = 64, width = 120, height = 64},
+        },
         speed = 500,
         hardpoint = 0,
         lastMissile = 0,
@@ -83,7 +91,7 @@ function playerUpdate(self, dt)
     self.y = math.min(self.y, love.graphics.getHeight() - self.height)
 
     -- fire ze missiles
-    now = love.timer.getTime()
+    local now = love.timer.getTime()
     if love.keyboard.isDown("space") and now - self.lastMissile > self.reloadTime then
         local x = self.x
         if self.hardpoint == 0 then
