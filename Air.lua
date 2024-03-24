@@ -16,9 +16,9 @@ function itemAmmo(x, y, volume)
         draw = function(self, dt)
             cx = self.x + self.width / 2
             cy = self.y + self.height / 2
-            love.graphics.setColor(0, 0, 1)
+            love.graphics.setColor(1, 0, 0)
             love.graphics.circle("fill", cx, cy, self.width / 2)
-            love.graphics.setColor(0, 0, 0.8)
+            love.graphics.setColor(0.8, 0, 0)
             love.graphics.circle("fill", cx, cy, self.width / 2 - 8)
             love.graphics.setColor(0, 0, 0)
             love.graphics.circle("line", cx, cy, self.width / 2)
@@ -46,9 +46,9 @@ function itemHealth(x, y, volume)
         draw = function(self, dt)
             cx = self.x + self.width / 2
             cy = self.y + self.height / 2
-            love.graphics.setColor(0, 1, 1)
+            love.graphics.setColor(0, 1, 0)
             love.graphics.circle("fill", cx, cy, self.width / 2)
-            love.graphics.setColor(0, 0.8, 0.8)
+            love.graphics.setColor(0, 0.8, 0)
             love.graphics.circle("fill", cx, cy, self.width / 2 - 8)
             love.graphics.setColor(0, 0, 0)
             love.graphics.circle("line", cx, cy, self.width / 2)

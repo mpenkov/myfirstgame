@@ -200,5 +200,6 @@ function destroy(thing)
         ground:addCraters(thing.x, thing.y, thing.width / 4)
     end
 
+    thing.health = 0
     thing.active = false
 end
