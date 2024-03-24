@@ -152,6 +152,7 @@ function love.keypressed(key, scancode, isrepeat)
     if menu.show then
         menu:keypressed(key, scancode, isrepeat)
     elseif key == "escape" then
+        sfx:playEffect("ping")
         menu.show = true
     elseif not player.active and key == "return" then
         --
